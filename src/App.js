@@ -60,6 +60,19 @@ export default function App() {
           'fill-opacity': 0.1
         },
       });
+      map.current.addLayer({
+        'id': 'name-of-cities',
+        'type': 'symbol',
+        'source': 'jatim',
+        'layout': {
+          'text-field': [
+            'format',
+            ['upcase', ['get', 'name']],
+            { 'font-scale': 0.7 },
+          ],
+          'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold']
+          }
+        });
     });
   });
 
