@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from 'react';
 import 'antd/dist/antd.css'
-import { Card } from 'antd';
+import { Card, Button } from 'antd';
 import mapboxgl from '!mapbox-gl'; // eslint-disable-line import/no-webpack-loader-syntax
 
 import jawaTimurGeoJson from './data/jawa-timur.geojson'
@@ -13,6 +13,8 @@ export default function App() {
   const [lng, setLng] = useState(112.9277);
   const [lat, setLat] = useState(-7.7432);
   const [zoom, setZoom] = useState(7.7);
+
+  const [layerOutline, setLayerOutline] = useState(true)
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -72,10 +74,38 @@ export default function App() {
           ],
           'text-font': ['Open Sans Semibold', 'Arial Unicode MS Bold']
           }
+      });
+      map.current.addLayer({
+        'id': 'counties-highlighted',
+        'type': 'fill',
+        'source': 'jatim',
+        // 'source-layer': 'original',
+        'paint': {
+        'fill-outline-color': '#484896',
+        'fill-color': '#6e599f',
+        'fill-opacity': 0.75
+        },
+        'filter': ['in', 'name', '']
+      })
+      map.current.on('click', (e) => {
+        // Set `bbox` as 5px reactangle area around clicked point.
+        const bbox = [
+        [e.point.x - 5, e.point.y - 5],
+        [e.point.x + 5, e.point.y + 5]
+        ];
+        // Find features intersecting the bounding box.
+        const selectedFeatures = map.current.queryRenderedFeatures(bbox, {
+        layers: ['fill-cities']
+        });
+        const name = selectedFeatures.map(
+        (feature) => feature.properties.name
+        );
+        // Set a filter matching selected features by FIPS codes
+        // to activate the 'counties-highlighted' layer.
+        map.current.setFilter('counties-highlighted', ['in', 'name', ...name]);
         });
     });
   });
-
   return (
   <div>
     <div className="sidebar">
